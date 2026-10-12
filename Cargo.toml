@@ -1,0 +1,3 @@
+[workspace]
+members = ["embedded", "tool"]
+resolver = "2"

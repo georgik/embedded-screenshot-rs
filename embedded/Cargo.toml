@@ -1,0 +1,15 @@
+[package]
+edition = "2024"
+name = "esp-screenshot"
+version = "0.1.0"
+authors = ["Juraj Michálek <juraj.michalek@espressif.com>"]
+license = "MIT OR Apache-2.0"
+description = "esp_lcd_screenshot-compatible framebuffer dumps over the serial console for embedded-graphics devices"
+
+[features]
+default = []
+# Convenience helpers for embedded-graphics pixel colors.
+embedded-graphics = ["dep:embedded-graphics"]
+
+[dependencies]
+embedded-graphics = { version = "0.8", default-features = false, optional = true }
