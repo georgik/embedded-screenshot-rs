@@ -28,10 +28,10 @@ jobs:
         include:
           # The esp-println feature is not host-testable: its build script
           # requires a console backend that only an app can select.
-          - package: esp-screenshot
+          - package: embedded-screenshot
             features: ""
             cache_key: default
-          - package: esp-screenshot
+          - package: embedded-screenshot
             features: "--features async,embedded-graphics"
             # Commas are not allowed in cache keys.
             cache_key: async-embedded-graphics
@@ -55,5 +55,5 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy -p esp-screenshot --features async,embedded-graphics -- -D warnings
+      - run: cargo clippy -p embedded-screenshot --features async,embedded-graphics -- -D warnings
       - run: cargo clippy -p screenshot-decoder -- -D warnings

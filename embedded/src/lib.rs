@@ -25,12 +25,12 @@
 //! ```ignore
 //! // Rgb565 framebuffer stored as little-endian u16 pixels:
 //! let pixel_bytes: alloc::vec::Vec<u8> =
-//!     esp_screenshot::rgb565_le_bytes(&frame_buf.data).collect();
-//! esp_screenshot::write_framebuffer(
-//!     &mut esp_screenshot::ConsolePrinter,
+//!     embedded_screenshot::rgb565_le_bytes(&frame_buf.data).collect();
+//! embedded_screenshot::write_framebuffer(
+//!     &mut embedded_screenshot::ConsolePrinter,
 //!     320,
 //!     240,
-//!     esp_screenshot::RGBL,
+//!     embedded_screenshot::RGBL,
 //!     &pixel_bytes,
 //! )
 //! .ok();
@@ -40,7 +40,7 @@
 //!
 //! ```ignore
 //! let mut uart = Uart::new(peripherals.UART1, Config::default())?;
-//! esp_screenshot::write_framebuffer(&mut uart, 320, 240, RGBL, &pixel_bytes)?;
+//! embedded_screenshot::write_framebuffer(&mut uart, 320, 240, RGBL, &pixel_bytes)?;
 //! ```
 //!
 //! # Blocking vs async

@@ -1,4 +1,4 @@
-# esp-screenshot
+# embedded-screenshot
 
 FrameBuffer screenshot dumping over any `embedded_io::Write` byte sink
 (serial console, USB, TCP, ...), compatible with the
@@ -30,10 +30,10 @@ Add the dependency and a feature gate to the board's `Cargo.toml`:
 
 ```toml
 [dependencies]
-esp-screenshot = { path = "../esp-screenshot/embedded", optional = true, features = ["embedded-graphics", "esp-println"] }
+embedded-screenshot = { path = "../embedded-screenshot-rs/embedded", optional = true, features = ["embedded-graphics", "esp-println"] }
 
 [features]
-screenshot = ["dep:esp-screenshot"]
+screenshot = ["dep:embedded-screenshot"]
 ```
 
 In `main.rs`, dump the framebuffer after it has been rendered. The writer is
@@ -48,11 +48,11 @@ fn render(...) {
     #[cfg(feature = "screenshot")]
     {
         let pixel_bytes: alloc::vec::Vec<u8> =
-            esp_screenshot::rgb565_le_bytes(frame_buf.data.as_ref()).collect();
-        esp_screenshot::write_framebuffer(
-            &mut esp_screenshot::ConsolePrinter,
+            embedded_screenshot::rgb565_le_bytes(frame_buf.data.as_ref()).collect();
+        embedded_screenshot::write_framebuffer(
+            &mut embedded_screenshot::ConsolePrinter,
             320, 240,
-            esp_screenshot::RGBL,
+            embedded_screenshot::RGBL,
             &pixel_bytes,
         ).ok();
     }
@@ -65,7 +65,7 @@ or a TCP socket for screenshots over the network:
 
 ```rust
 let mut uart = Uart::new(peripherals.UART1, Config::default())?;
-esp_screenshot::write_framebuffer(&mut uart, 320, 240, RGBL, &pixel_bytes)?;
+embedded_screenshot::write_framebuffer(&mut uart, 320, 240, RGBL, &pixel_bytes)?;
 ```
 
 ### Blocking vs async
@@ -80,7 +80,7 @@ features = ["embedded-graphics", "async"]
 ```
 
 ```rust
-esp_screenshot::write_framebuffer_async(&mut uart, 320, 240, RGBL, &pixel_bytes).await?;
+embedded_screenshot::write_framebuffer_async(&mut uart, 320, 240, RGBL, &pixel_bytes).await?;
 ```
 
 Build with `cargo b -r --features screenshot`. Without the feature, the

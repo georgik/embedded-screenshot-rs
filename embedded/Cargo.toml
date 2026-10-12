@@ -1,10 +1,12 @@
 [package]
 edition = "2024"
-name = "esp-screenshot"
+name = "embedded-screenshot"
 version = "0.1.0"
 authors = ["Juraj Michálek <juraj.michalek@espressif.com>"]
 license = "MIT OR Apache-2.0"
-description = "esp_lcd_screenshot-compatible framebuffer dumps for embedded-graphics devices, generic over embedded-io"
+description = "Chip-agnostic framebuffer screenshot dumps over any embedded_io::Write sink, compatible with the esp_lcd_screenshot protocol"
+keywords = ["embedded", "screenshot", "framebuffer", "no-std", "embedded-graphics"]
+categories = ["embedded", "no-std", "graphics"]
 
 [features]
 default = []
