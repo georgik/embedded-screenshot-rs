@@ -4,12 +4,19 @@ name = "esp-screenshot"
 version = "0.1.0"
 authors = ["Juraj Michálek <juraj.michalek@espressif.com>"]
 license = "MIT OR Apache-2.0"
-description = "esp_lcd_screenshot-compatible framebuffer dumps over the serial console for embedded-graphics devices"
+description = "esp_lcd_screenshot-compatible framebuffer dumps for embedded-graphics devices, generic over embedded-io"
 
 [features]
 default = []
 # Convenience helpers for embedded-graphics pixel colors.
 embedded-graphics = ["dep:embedded-graphics"]
+# Async dump via embedded-io-async, for executor-driven apps (embassy & co).
+async = ["dep:embedded-io-async"]
+# Ready-made sink for the esp-println console (auto-selects UART / USB serial JTAG).
+esp-println = ["dep:esp-println"]
 
 [dependencies]
 embedded-graphics = { version = "0.8", default-features = false, optional = true }
+embedded-io = { version = "0.7", default-features = false }
+embedded-io-async = { version = "0.7", default-features = false, optional = true }
+esp-println = { version = "0.17", default-features = false, optional = true }

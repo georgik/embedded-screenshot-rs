@@ -1,6 +1,7 @@
 # esp-screenshot
 
-FrameBuffer screenshot dumping over the serial console, compatible with the
+FrameBuffer screenshot dumping over any `embedded_io::Write` byte sink
+(serial console, USB, TCP, ...), compatible with the
 Espressif [`esp_lcd_screenshot`](https://components.espressif.com/components/espressif/esp_lcd_screenshot)
 component. No camera, no golden files on the device — the framebuffer already
 in RAM is dumped as text:
@@ -29,26 +30,18 @@ Add the dependency and a feature gate to the board's `Cargo.toml`:
 
 ```toml
 [dependencies]
-esp-screenshot = { path = "../esp-screenshot/embedded", optional = true, features = ["embedded-graphics"] }
+esp-screenshot = { path = "../esp-screenshot/embedded", optional = true, features = ["embedded-graphics", "esp-println"] }
 
 [features]
 screenshot = ["dep:esp-screenshot"]
 ```
 
-In `main.rs`, dump the framebuffer after it has been rendered:
+In `main.rs`, dump the framebuffer after it has been rendered. The writer is
+generic over [`embedded_io::Write`](https://docs.rs/embedded-io), so any
+byte sink works — the built-in `ConsolePrinter` forwards to the `esp-println`
+console (UART or USB serial JTAG, whichever `esp-println` is configured for):
 
 ```rust
-#[cfg(feature = "screenshot")]
-struct SerialWriter;
-
-#[cfg(feature = "screenshot")]
-impl core::fmt::Write for SerialWriter {
-    fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        esp_println::print!("{s}");
-        Ok(())
-    }
-}
-
 fn render(...) {
     // ... render the framebuffer and flush it to the display ...
 
@@ -57,13 +50,37 @@ fn render(...) {
         let pixel_bytes: alloc::vec::Vec<u8> =
             esp_screenshot::rgb565_le_bytes(frame_buf.data.as_ref()).collect();
         esp_screenshot::write_framebuffer(
-            &mut SerialWriter,
+            &mut esp_screenshot::ConsolePrinter,
             320, 240,
             esp_screenshot::RGBL,
             &pixel_bytes,
         ).ok();
     }
 }
+```
+
+Other `embedded_io::Write` sinks drop in without a shim, which makes
+sinks beyond the serial console possible — a second UART, a USB CDC stack,
+or a TCP socket for screenshots over the network:
+
+```rust
+let mut uart = Uart::new(peripherals.UART1, Config::default())?;
+esp_screenshot::write_framebuffer(&mut uart, 320, 240, RGBL, &pixel_bytes)?;
+```
+
+### Blocking vs async
+
+`write_framebuffer` is blocking and works in any app, including plain
+super-loop firmware without an executor. Executor-driven apps (embassy &
+co) can enable the `async` feature and use the awaitable twin, which shares
+the same encoder core:
+
+```toml
+features = ["embedded-graphics", "async"]
+```
+
+```rust
+esp_screenshot::write_framebuffer_async(&mut uart, 320, 240, RGBL, &pixel_bytes).await?;
 ```
 
 Build with `cargo b -r --features screenshot`. Without the feature, the

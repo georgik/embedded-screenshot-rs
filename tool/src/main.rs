@@ -47,11 +47,11 @@ fn base64_decode_char(c: u8) -> Option<u32> {
 /// `validate=True` behavior of the component's pytest fixture.
 fn base64_decode(input: &str) -> Option<Vec<u8>> {
     let bytes = input.trim_end().as_bytes();
-    if bytes.is_empty() || bytes.len() % 4 != 0 {
+    if bytes.is_empty() || !bytes.len().is_multiple_of(4) {
         return None;
     }
     let padding = bytes.iter().rev().take_while(|&&c| c == b'=').count();
-    if padding > 2 || bytes[..bytes.len() - padding].iter().any(|&c| c == b'=') {
+    if padding > 2 || bytes[..bytes.len() - padding].contains(&b'=') {
         return None;
     }
     let mut out = Vec::with_capacity(bytes.len() / 4 * 3);
@@ -76,6 +76,7 @@ fn base64_decode(input: &str) -> Option<Vec<u8>> {
     Some(out)
 }
 
+#[derive(Clone)]
 struct FrameMetadata {
     width: u32,
     height: u32,
@@ -89,18 +90,20 @@ fn extract_payload(lines: &[String]) -> Result<(FrameMetadata, Vec<u8>), String>
     let mut payload = String::new();
     for line in lines {
         let line = line.trim();
-        if metadata.is_some() {
+        if let Some(meta) = &metadata {
             if line == "FRAMEBUFFER_END" {
-                let meta = metadata.unwrap();
-                let raw = base64_decode(&payload)
-                    .ok_or_else(|| "Invalid base64 payload".to_string())?;
+                let raw =
+                    base64_decode(&payload).ok_or_else(|| "Invalid base64 payload".to_string())?;
                 let bytes_pp = fourcc_bytes_per_pixel(&meta.fourcc)
                     .ok_or_else(|| format!("Unsupported fourcc: {}", meta.fourcc))?;
                 let expected = meta.width as usize * meta.height as usize * bytes_pp;
                 if raw.len() != expected {
-                    return Err(format!("Expected {expected} decoded bytes, got {}", raw.len()));
+                    return Err(format!(
+                        "Expected {expected} decoded bytes, got {}",
+                        raw.len()
+                    ));
                 }
-                return Ok((meta, raw));
+                return Ok((meta.clone(), raw));
             }
             if let Some(rest) = line.strip_prefix("FB_BASE64 ") {
                 payload.push_str(rest.trim_end());
@@ -129,7 +132,7 @@ fn to_rgb888(fourcc: &str, raw: &[u8]) -> Result<Vec<u8>, String> {
     match fourcc {
         "RGBL" => {
             let mut out = Vec::with_capacity(raw.len() / 2 * 3);
-            for px in raw.chunks_exact(2) {
+            for px in raw.as_chunks::<2>().0 {
                 let value = u16::from_le_bytes([px[0], px[1]]);
                 out.push((((value >> 11) & 0x1F) << 3) as u8);
                 out.push((((value >> 5) & 0x3F) << 2) as u8);
@@ -140,7 +143,7 @@ fn to_rgb888(fourcc: &str, raw: &[u8]) -> Result<Vec<u8>, String> {
         "RGB3" => Ok(raw.to_vec()),
         "BGR3" => {
             let mut out = raw.to_vec();
-            for px in out.chunks_exact_mut(3) {
+            for px in out.as_chunks_mut::<3>().0 {
                 px.swap(0, 2);
             }
             Ok(out)
@@ -152,7 +155,8 @@ fn to_rgb888(fourcc: &str, raw: &[u8]) -> Result<Vec<u8>, String> {
 fn write_ppm(path: &str, width: u32, height: u32, rgb888: &[u8]) -> std::io::Result<()> {
     std::fs::write(
         path,
-        format!("P6\n{width} {height}\n255\n").into_bytes()
+        format!("P6\n{width} {height}\n255\n")
+            .into_bytes()
             .iter()
             .copied()
             .chain(rgb888.iter().copied())
@@ -266,8 +270,7 @@ mod tests {
         log.push("FRAMEBUFFER_END".to_string());
         log.push("I (500) trailing log noise".to_string());
 
-        let (metadata, decoded) =
-            extract_payload(&log).expect("payload extraction failed");
+        let (metadata, decoded) = extract_payload(&log).expect("payload extraction failed");
         assert_eq!((metadata.width, metadata.height), (width, height));
         assert_eq!(metadata.fourcc, "RGBL");
         assert_eq!(decoded, raw);
@@ -301,7 +304,10 @@ mod tests {
     #[test]
     fn rgb565le_to_rgb888_known_colors() {
         // 0xFFFF (RGB565 white) expands to (248, 252, 248), not pure white.
-        assert_eq!(to_rgb888("RGBL", &[0xFF, 0xFF]).unwrap(), vec![248, 252, 248]);
+        assert_eq!(
+            to_rgb888("RGBL", &[0xFF, 0xFF]).unwrap(),
+            vec![248, 252, 248]
+        );
         // 0x0000 black stays black.
         assert_eq!(to_rgb888("RGBL", &[0x00, 0x00]).unwrap(), vec![0, 0, 0]);
         // Pure red: 0xF800 -> (248, 0, 0).
