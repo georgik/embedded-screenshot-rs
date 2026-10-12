@@ -71,12 +71,27 @@ production binary keeps its minimal footprint.
 
 ## Capturing and decoding
 
-Flash and monitor the board, capture the serial output, then decode:
+Install the decoder once with `cargo install` — either from GitHub (no
+checkout needed):
+
+```bash
+cargo install --git https://github.com/georgik/esp-screenshot-rs screenshot-decoder
+# or pin to a commit for reproducible builds:
+cargo install --git https://github.com/georgik/esp-screenshot-rs --rev 87ea89398af5df64c1b8110603dbdf0c0b1e2852 screenshot-decoder
+```
+
+or from a local clone:
+
+```bash
+cargo install --path tool
+```
+
+Then flash and monitor the board, capture the serial output, and decode:
 
 ```bash
 cd boards/<board> && cargo run -r --features screenshot 2>&1 | tee /tmp/serial.log
 # Ctrl+C once the dump has been emitted, then:
-../esp-screenshot/tool/target/release/screenshot-decoder /tmp/serial.log --output screenshot
+screenshot-decoder /tmp/serial.log --output screenshot
 ```
 
 Outputs `screenshot.png` and `screenshot.ppm`.
