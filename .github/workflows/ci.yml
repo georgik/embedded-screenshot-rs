@@ -11,7 +11,7 @@ env:
 jobs:
   fmt:
     name: Format
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
@@ -20,8 +20,8 @@ jobs:
       - run: cargo fmt --check
 
   test:
-    name: Test (${{ matrix.package }} ${{ matrix.features }})
-    runs-on: ubuntu-latest
+    name: Test (${{ matrix.package }} ${{ matrix.cache_key }})
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -30,21 +30,25 @@ jobs:
           # requires a console backend that only an app can select.
           - package: esp-screenshot
             features: ""
+            cache_key: default
           - package: esp-screenshot
             features: "--features async,embedded-graphics"
+            # Commas are not allowed in cache keys.
+            cache_key: async-embedded-graphics
           - package: screenshot-decoder
             features: ""
+            cache_key: default
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ matrix.package }}-${{ matrix.features }}
+          key: ${{ matrix.cache_key }}
       - run: cargo test -p ${{ matrix.package }} ${{ matrix.features }}
 
   clippy:
     name: Clippy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
