@@ -35,7 +35,7 @@ jobs:
             features: "--features async,embedded-graphics"
             # Commas are not allowed in cache keys.
             cache_key: async-embedded-graphics
-          - package: screenshot-decoder
+          - package: embedded-screenshot-decoder
             features: ""
             cache_key: default
     steps:
@@ -56,4 +56,4 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -p embedded-screenshot --features async,embedded-graphics -- -D warnings
-      - run: cargo clippy -p screenshot-decoder -- -D warnings
+      - run: cargo clippy -p embedded-screenshot-decoder -- -D warnings

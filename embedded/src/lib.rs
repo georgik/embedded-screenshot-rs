@@ -11,7 +11,10 @@
 //!
 //! The payload lines are plain text, so any host-side tool written for
 //! `esp_lcd_screenshot` can decode them unchanged — including the
-//! `screenshot-decoder` tool that lives next to this crate.
+//! `embedded-screenshot-decoder` tool that lives next to this crate.
+//!
+//! See the crate README for a real-world usage example:
+//! [esp32-conways-game-of-life-rs](https://github.com/georgik/esp32-conways-game-of-life-rs).
 //!
 //! # Usage
 //!

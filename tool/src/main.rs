@@ -10,8 +10,8 @@
 //!
 //! Usage:
 //! ```text
-//! screenshot-decoder serial.log --output screenshot
-//! espflash monitor | screenshot-decoder - --output screenshot
+//! embedded-screenshot-decoder serial.log --output screenshot
+//! espflash monitor | embedded-screenshot-decoder - --output screenshot
 //! ```
 
 use std::io::Read;
@@ -167,7 +167,7 @@ fn write_ppm(path: &str, width: u32, height: u32, rgb888: &[u8]) -> std::io::Res
 fn main() {
     let mut args = std::env::args().skip(1);
     let input_path = args.next().unwrap_or_else(|| {
-        eprintln!("Usage: screenshot-decoder <serial.log|-> [--output <prefix>]");
+        eprintln!("Usage: embedded-screenshot-decoder <serial.log|-> [--output <prefix>]");
         std::process::exit(2);
     });
     let output_prefix = match (args.next().as_deref(), args.next().as_deref()) {

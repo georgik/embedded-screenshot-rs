@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: |
+          cargo test -p embedded-screenshot --features async,embedded-graphics
+          cargo test -p embedded-screenshot-decoder
+
+      - name: Check packaging
+        run: |
+          cargo publish -p embedded-screenshot --dry-run --allow-dirty
+          cargo publish -p embedded-screenshot-decoder --dry-run --allow-dirty
+
+      # CARGO_REGISTRY_TOKEN is picked up automatically by cargo; the
+      # explicit mapping makes the secret source visible.
+      - name: Publish embedded-screenshot
+        run: cargo publish -p embedded-screenshot
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Publish embedded-screenshot-decoder
+        run: cargo publish -p embedded-screenshot-decoder
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

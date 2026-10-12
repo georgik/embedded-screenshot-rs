@@ -1,9 +1,10 @@
 [package]
 edition = "2024"
-name = "screenshot-decoder"
+name = "embedded-screenshot-decoder"
 version = "0.1.0"
 license = "MIT OR Apache-2.0"
 description = "Decode esp_lcd_screenshot serial dumps into PNG/PPM images"
+repository = "https://github.com/georgik/embedded-screenshot-rs"
 
 [dependencies]
 image = { version = "0.25", default-features = false, features = ["png"] }

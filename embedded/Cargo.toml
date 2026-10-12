@@ -7,6 +7,8 @@ license = "MIT OR Apache-2.0"
 description = "Chip-agnostic framebuffer screenshot dumps over any embedded_io::Write sink, compatible with the esp_lcd_screenshot protocol"
 keywords = ["embedded", "screenshot", "framebuffer", "no-std", "embedded-graphics"]
 categories = ["embedded", "no-std", "graphics"]
+repository = "https://github.com/georgik/embedded-screenshot-rs"
+readme = "../README.md"
 
 [features]
 default = []

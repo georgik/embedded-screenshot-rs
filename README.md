@@ -22,7 +22,13 @@ it unchanged.
 | Directory | Target | Purpose |
 |-----------|--------|---------|
 | `embedded/` | `no_std` (core only) | Library crate linked into board applications |
-| `tool/` | host, std | `screenshot-decoder`: serial log → PNG/PPM |
+| `tool/` | host, std | `embedded-screenshot-decoder` (crate `embedded-screenshot-decoder`): serial log → PNG/PPM |
+
+## Used by
+
+- [esp32-conways-game-of-life-rs](https://github.com/georgik/esp32-conways-game-of-life-rs) —
+  Conway's Game of Life on ESP32-S3-BOX-3 (Bevy ECS, no_std), dumps the
+  framebuffer over the serial console with the `screenshot` feature.
 
 ## Using the library in a board crate
 
@@ -92,9 +98,9 @@ Install the decoder once with `cargo install` — either from GitHub (no
 checkout needed):
 
 ```bash
-cargo install --git https://github.com/georgik/esp-screenshot-rs screenshot-decoder
+cargo install --git https://github.com/georgik/embedded-screenshot-rs embedded-screenshot-decoder
 # or pin to a commit for reproducible builds:
-cargo install --git https://github.com/georgik/esp-screenshot-rs --rev 87ea89398af5df64c1b8110603dbdf0c0b1e2852 screenshot-decoder
+cargo install --git https://github.com/georgik/embedded-screenshot-rs --rev <commit-sha> embedded-screenshot-decoder
 ```
 
 or from a local clone:
@@ -108,12 +114,12 @@ Then flash and monitor the board, capture the serial output, and decode:
 ```bash
 cd boards/<board> && cargo run -r --features screenshot 2>&1 | tee /tmp/serial.log
 # Ctrl+C once the dump has been emitted, then:
-screenshot-decoder /tmp/serial.log --output screenshot
+embedded-screenshot-decoder /tmp/serial.log --output screenshot
 ```
 
 Outputs `screenshot.png` and `screenshot.ppm`.
 
-The decoder also accepts stdin (`screenshot-decoder -`) and tolerates
+The decoder also accepts stdin (`embedded-screenshot-decoder -`) and tolerates
 unrelated log noise around the `FRAMEBUFFER_BEGIN`/`FRAMEBUFFER_END` block.
 
 ## Notes
