@@ -1,6 +1,7 @@
 [package]
 edition = "2024"
 name = "embedded-screenshot-decoder"
+authors = ["Juraj Michálek <juraj.michalek@espressif.com>"]
 version = "0.1.0"
 license = "MIT OR Apache-2.0"
 description = "Decode esp_lcd_screenshot serial dumps into PNG/PPM images"
